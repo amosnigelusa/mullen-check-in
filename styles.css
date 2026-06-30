@@ -135,13 +135,13 @@ body::before {
 }
 .appbar__lead { display: flex; align-items: center; gap: 16px; min-width: 0; }
 .appbar__logo {
-  height: 42px;
+  height: 63px;
   width: auto;
   flex: none;
   transition: transform 0.4s var(--ease-emphasized);
 }
 .appbar__logo:active { transform: scale(0.96); }
-.appbar__rule { width: 1px; height: 40px; background: var(--outline-variant); flex: none; }
+.appbar__rule { width: 1px; height: 58px; background: var(--outline-variant); flex: none; }
 .appbar__titles { display: flex; flex-direction: column; min-width: 0; }
 .appbar__eyebrow {
   font-size: 0.7rem;
@@ -713,7 +713,7 @@ input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity
 @media (max-width: 560px) {
   .appbar { flex-wrap: wrap; }
   .appbar__title { white-space: normal; font-size: 1.08rem; }
-  .appbar__logo { height: 36px; }
+  .appbar__logo { height: 54px; }
   .actions { flex-direction: column; }
   .btn { width: 100%; }
   .expiry { flex-direction: column; }
