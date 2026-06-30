@@ -72,6 +72,12 @@ window.CHECKIN_CONFIG = {
     },
   },
 
+  // ID types that always map to one Card Issuer — selecting the type fills
+  // Card Issuer automatically (no sub-dropdown needed).
+  autoIssuer: {
+    "Catholic U Alumni": "The Catholic University of America",
+  },
+
   // Pre-filled defaults so staff rarely have to type these.
   // Card Issuer varies too much here (school name, state, country) to default,
   // so it's left blank; Expiration defaults to "NA" since many cards lack one.

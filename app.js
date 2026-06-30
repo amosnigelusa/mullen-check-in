@@ -146,7 +146,8 @@
   // option fills Card Issuer (which stays the required field). Not required
   // itself, so it never conflicts with a scanned license that fills the state.
   function updateSubList() {
-    const cfg = (CFG.subLists || {})[els.idType.value];
+    const idType = els.idType.value;
+    const cfg = (CFG.subLists || {})[idType];
     if (cfg) {
       els.subLabel.textContent = cfg.label;
       els.subSelect.innerHTML =
@@ -162,6 +163,9 @@
       els.subSelect.disabled = true;
       els.subSelect.innerHTML = "";
     }
+    // Some ID types map to a single Card Issuer — fill it automatically.
+    const fixed = (CFG.autoIssuer || {})[idType];
+    if (fixed && els.cardIssuer.value.trim() !== fixed) flashFill(els.cardIssuer, fixed);
   }
 
   function setBadge(text, cls) {
