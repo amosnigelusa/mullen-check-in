@@ -7,6 +7,7 @@ window.CHECKIN_CONFIG = {
   // Google Form / Sheet expects.
   idTypes: [
     "WRLC University Card",
+    "Catholic U Alumni",
     "Washington Theological Consortium ID Card",
     "US State ID / Driver's License",
     "Other College / University ID",
