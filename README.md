@@ -1,8 +1,12 @@
 # Welcome Desk Check-In
 
+**Version 1.0.0** · The Catholic University of America — University Libraries, Mullen Library
+
 A fast, keyboard-first replacement for the visitor check-in Google Form.
 Staff-operated, runs in Chrome on the desk PC, and appends rows straight to the
-existing **Form_Responses** Google Sheet — so nothing downstream changes.
+existing responses Google Sheet — so nothing downstream changes.
+
+📖 **[Full documentation](DOCUMENTATION.md)** · 📝 **[Changelog](CHANGELOG.md)**
 
 ## 🔗 Live demo
 
@@ -56,7 +60,6 @@ rows stay in the browser until you connect the Sheet.
 
 Edit [`config.js`](config.js):
 - `idTypes` — **make this match the form's ID Type dropdown exactly.**
-  (Currently only two options are filled in — add the rest.)
 - `defaults` — the pre-filled Card Issuer / Expiration values.
 
 ## Passport scanning

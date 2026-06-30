@@ -1,7 +1,8 @@
 // ----------------------------------------------------------------------------
-// Welcome Desk Check-In — configuration
+// Welcome Desk Check-In — configuration  (app version 1.0.0)
 // Edit these values to match your form. No other file needs changing.
 // ----------------------------------------------------------------------------
+window.CHECKIN_VERSION = "1.0.0";
 window.CHECKIN_CONFIG = {
   // Options for the "ID Type" dropdown — must match the exact strings your
   // Google Form / Sheet expects.

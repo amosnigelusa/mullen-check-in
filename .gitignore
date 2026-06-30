@@ -14,6 +14,8 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+# Office temp lock files
+~$*
 
 # Env / secrets
 .env

@@ -3,6 +3,7 @@
   "short_name": "Patron Sign-In",
   "description": "Welcome-desk check-in for The Catholic University of America — University Libraries, Mullen Library.",
   "id": "/mullen-patron-signin",
+  "version": "1.0.0",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
