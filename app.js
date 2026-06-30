@@ -8,7 +8,6 @@
   const LS_ENDPOINT = "checkin.endpoint";
   const LS_HISTORY = "checkin.history";       // returning-visitor memory
   const LS_QUEUE = "checkin.queue";           // rows captured while offline
-  const LS_LASTTYPE = "checkin.lastType";
 
   const $ = (id) => document.getElementById(id);
   const form = $("checkinForm");
@@ -45,12 +44,11 @@
 
   // --- init ----------------------------------------------------------------
   function init() {
-    // populate ID Type dropdown
+    // populate ID Type dropdown — always starts on the "Choose…" placeholder
     els.idType.innerHTML =
-      `<option value="" disabled>Choose…</option>` +
+      `<option value="" disabled selected>Choose…</option>` +
       CFG.idTypes.map((t) => `<option>${escapeHtml(t)}</option>`).join("");
-    const lastType = localStorage.getItem(LS_LASTTYPE);
-    els.idType.value = lastType && CFG.idTypes.includes(lastType) ? lastType : "";
+    els.idType.value = "";
 
     applyDefaults();
     updateSubList();
@@ -220,10 +218,7 @@
       document.addEventListener(ev, armIdleTimer, true)
     );
     $("resetBtn").addEventListener("click", () => resetForm(true));
-    els.idType.addEventListener("change", () => {
-      localStorage.setItem(LS_LASTTYPE, els.idType.value);
-      updateSubList();
-    });
+    els.idType.addEventListener("change", updateSubList);
     els.subSelect.addEventListener("change", () => {
       if (els.subSelect.value) {
         els.cardIssuer.value = els.subSelect.value;
@@ -852,10 +847,7 @@
     form.reset();
     nameAutofilled = false;
     applyDefaults();
-    els.idType.value =
-      localStorage.getItem(LS_LASTTYPE) && CFG.idTypes.includes(localStorage.getItem(LS_LASTTYPE))
-        ? localStorage.getItem(LS_LASTTYPE)
-        : "";
+    els.idType.value = "";       // no remembered type — start blank every time
     updateSubList();
     if (full) setScanMsg("", "");
     clearScan();
