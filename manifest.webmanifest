@@ -1,0 +1,30 @@
+{
+  "name": "Mullen Library · Patron Sign-In",
+  "short_name": "Patron Sign-In",
+  "description": "Welcome-desk check-in for The Catholic University of America — University Libraries, Mullen Library.",
+  "id": "/mullen-patron-signin",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#fff8f7",
+  "theme_color": "#990000",
+  "categories": ["productivity", "education"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

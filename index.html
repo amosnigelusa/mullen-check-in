@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#990000" />
+  <meta name="color-scheme" content="light" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Patron Sign-In" />
+  <title>Mullen Library · Patron Sign-In</title>
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/app-icon.svg" />
+  <link rel="icon" type="image/svg+xml" href="assets/app-icon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Flex:opsz,wght@8..144,400..800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="appbar">
+      <div class="appbar__lead">
+        <img class="appbar__logo" src="assets/cua-wordmark.svg"
+             alt="The Catholic University of America" />
+        <span class="appbar__rule" aria-hidden="true"></span>
+        <div class="appbar__titles">
+          <span class="appbar__eyebrow">University Libraries</span>
+          <h1 class="appbar__title">Mullen Library · Patron Sign-In</h1>
+        </div>
+      </div>
+      <div class="appbar__actions">
+        <span id="modeBadge" class="badge badge--mock">Offline mode</span>
+        <button id="settingsBtn" class="iconbtn m3-ripple" title="Settings" type="button">
+          <span class="msym" aria-hidden="true">settings</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app">
+      <section class="scanbox reveal" style="--d:0">
+        <div class="scanbox__head">
+          <span class="scanbox__icon msym" aria-hidden="true">barcode_scanner</span>
+          <div class="scanbox__copy">
+            <label for="scanInput" class="scanbox__title">Scan ID barcode</label>
+            <span class="scanbox__sub">or type in the fields below to enter manually</span>
+          </div>
+        </div>
+        <div class="scanbox__field">
+          <textarea id="scanInput" rows="1" autofocus
+            placeholder="Tap here, then scan the back of a US license / State ID…"></textarea>
+          <span class="scanbox__line" aria-hidden="true"></span>
+        </div>
+        <p id="scanMsg" class="scanmsg" role="status" aria-live="polite"></p>
+        <button type="button" id="scanPassportBtn" class="btn btn--tonal m3-ripple camera-launch">
+          <span class="msym" aria-hidden="true">document_scanner</span>
+          Scan passport with camera
+        </button>
+      </section>
+
+      <form id="checkinForm" class="card reveal" style="--d:1" autocomplete="off">
+        <div class="field">
+          <label for="fullName">Full Name <span class="req">*</span></label>
+          <div class="hint">Add exactly as written on ID</div>
+          <div class="control">
+            <span class="control__icon msym" aria-hidden="true">person</span>
+            <input id="fullName" name="fullName" type="text" required autofocus />
+          </div>
+          <ul id="suggestions" class="suggestions" hidden></ul>
+        </div>
+
+        <div class="field">
+          <label for="idNumber">ID Number <span class="req">*</span></label>
+          <div class="hint">No spaces or special characters (hyphens, colons, etc.)</div>
+          <div class="control">
+            <span class="control__icon msym" aria-hidden="true">badge</span>
+            <input id="idNumber" name="idNumber" type="text" required
+                   inputmode="text" autocapitalize="characters" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="idType">ID Type <span class="req">*</span></label>
+          <div class="control control--select">
+            <span class="control__icon msym" aria-hidden="true">style</span>
+            <select id="idType" name="idType" required></select>
+          </div>
+        </div>
+
+        <div class="field" id="subField" hidden>
+          <label for="subSelect"><span id="subLabel">Details</span></label>
+          <div class="hint">Picking this fills Card Issuer below</div>
+          <div class="control control--select">
+            <span class="control__icon msym" aria-hidden="true">account_balance</span>
+            <select id="subSelect" name="subSelect" disabled></select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="cardIssuer">Card Issuer <span class="req">*</span></label>
+          <div class="hint">Institution/group the card is from (e.g. full school name, or country/state)</div>
+          <div class="control">
+            <span class="control__icon msym" aria-hidden="true">apartment</span>
+            <input id="cardIssuer" name="cardIssuer" type="text" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="expDate">Expiration Date <span class="req">*</span></label>
+          <div class="hint">Pick the date on the card, or tick "NA" if it has none</div>
+          <div class="expiry">
+            <div class="control control--date">
+              <span class="control__icon msym" aria-hidden="true">event</span>
+              <input id="expDate" type="date" />
+            </div>
+            <label class="expiry__na m3-ripple">
+              <input id="expNA" type="checkbox" /> NA (no expiry)
+            </label>
+          </div>
+          <input id="expiration" name="expiration" type="hidden" />
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn--filled m3-ripple" id="submitBtn">
+            <span class="msym" aria-hidden="true">how_to_reg</span>
+            Check In <span class="kbd">Enter</span>
+          </button>
+          <button type="button" class="btn btn--text m3-ripple" id="resetBtn">
+            <span class="msym" aria-hidden="true">close</span>
+            Clear <span class="kbd">Esc</span>
+          </button>
+        </div>
+      </form>
+
+      <section class="recent reveal" style="--d:2">
+        <div class="recent__head">
+          <span class="recent__icon msym" aria-hidden="true">history</span>
+          <h2>Last check-in <span id="recentCount" class="muted"></span></h2>
+        </div>
+        <ul id="recentList" class="recentlist"></ul>
+      </section>
+    </main>
+
+    <footer class="pagefoot">
+      <span>The Catholic University of America</span>
+      <span class="dot">•</span>
+      <span>University Libraries · Mullen Library</span>
+    </footer>
+  </div>
+
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" class="dialog__form">
+      <div class="dialog__head">
+        <span class="dialog__icon msym" aria-hidden="true">tune</span>
+        <h2>Settings</h2>
+      </div>
+      <label for="endpointUrl">Google Apps Script Web App URL</label>
+      <div class="control">
+        <span class="control__icon msym" aria-hidden="true">link</span>
+        <input id="endpointUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" />
+      </div>
+      <p class="muted small">Leave blank to stay in offline mode (rows are kept in this browser only).</p>
+      <div class="dialog__actions">
+        <button value="cancel" class="btn btn--text m3-ripple">Cancel</button>
+        <button value="save" class="btn btn--filled m3-ripple" id="saveSettings">
+          <span class="msym" aria-hidden="true">save</span> Save
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="cameraDialog" class="dialog camera">
+    <div class="camera__head">
+      <div class="dialog__head">
+        <span class="dialog__icon msym" aria-hidden="true">photo_camera</span>
+        <h2>Scan passport</h2>
+      </div>
+      <button id="camClose" class="iconbtn m3-ripple" title="Close" type="button">
+        <span class="msym" aria-hidden="true">close</span>
+      </button>
+    </div>
+    <div class="camera__wrap">
+      <video id="camVideo" playsinline muted></video>
+      <div class="camera__guide"><span>Line up the two rows of code inside this box</span></div>
+    </div>
+    <p id="camStatus" class="camera__status" role="status" aria-live="polite">Starting camera…</p>
+    <div class="camera__actions">
+      <button id="camCapture" class="btn btn--filled m3-ripple" type="button">
+        <span class="msym" aria-hidden="true">center_focus_strong</span> Capture now
+      </button>
+    </div>
+    <canvas id="camCanvas" hidden></canvas>
+  </dialog>
+
+  <div id="toastHost" class="toast-host" role="status" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="config.js"></script>
+  <script src="passport.js"></script>
+  <script src="aamva.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

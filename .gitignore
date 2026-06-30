@@ -1,0 +1,20 @@
+# Local Claude Code tooling config (contains the deployed Apps Script /exec URL)
+.claude/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Env / secrets
+.env
+.env.*

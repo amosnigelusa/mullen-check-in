@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Mullen Library Patron Sign-In">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#aa2222"/>
+      <stop offset="0.55" stop-color="#990000"/>
+      <stop offset="1" stop-color="#770000"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- maskable full-bleed background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#sheen)"/>
+
+  <!-- open book (kept inside the maskable safe zone) -->
+  <g>
+    <path d="M256 158 C214 132 160 130 128 144 L128 354 C160 340 214 342 256 368 C298 342 352 340 384 354 L384 144 C352 130 298 132 256 158 Z"
+          fill="#ffffff"/>
+    <path d="M256 158 L256 368" stroke="#990000" stroke-width="9" stroke-linecap="round"/>
+    <path d="M158 186 C190 178 224 180 244 192 M158 226 C190 218 224 220 244 232 M158 266 C190 258 224 260 244 272"
+          stroke="#e7c9c7" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M268 192 C288 180 322 178 354 186 M268 232 C288 220 322 218 354 226 M268 272 C288 260 322 258 354 266"
+          stroke="#e7c9c7" stroke-width="7" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- gold check badge (sign-in confirmed) -->
+  <circle cx="372" cy="372" r="58" fill="#c4a35a"/>
+  <circle cx="372" cy="372" r="58" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2"/>
+  <path d="M346 372 l17 18 l34 -38" fill="none" stroke="#ffffff" stroke-width="14"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
