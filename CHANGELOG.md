@@ -5,6 +5,26 @@ All notable changes to **Mullen Library · Patron Sign-In** are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-06-30
+
+### Added
+
+**Restricted-access (banned patron) alert**
+- New **staff-only column G ("Banned Patriot")** on the responses Sheet. Tick the
+  checkbox — or enter `Y` / `Yes` / `TRUE` — on a patron's row to flag them. The
+  check-in form never writes this column, so the flag survives check-in updates
+  (the app only writes columns A–F).
+- When the operator **presses Check In** for a flagged patron, the form **blocks the
+  check-in** (no row is recorded) and raises a loud, animated red
+  **"Restricted Library Access"** banner asking staff to contact a supervisor. The
+  alert flashes, pulses a halo, and shakes on entrance (respects
+  `prefers-reduced-motion`).
+- The flag is matched against the live roster by ID Number (or Full Name when blank).
+  It is **not** shown during scanning or auto-fill — only at the moment of check-in —
+  so it can't be dismissed by simply re-typing.
+- [`apps-script/Code.gs`](apps-script/Code.gs) now reads column G in both `buildRoster`
+  and `lookupById`; a ban on any matching row sticks to the person.
+
 ## [1.0.0] — 2026-06-30
 
 First official release. A fast, staff-operated, keyboard-first replacement for the

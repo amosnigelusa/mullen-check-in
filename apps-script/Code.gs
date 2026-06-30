@@ -5,6 +5,11 @@
  * order the Google Form uses:
  *   Timestamp | Full Name | ID Number | ID Type | Card Issuer | Expiration Date
  *
+ * Optional staff-only column G ("Banned Patriot"): tick the checkbox (or enter
+ * Y / Yes / TRUE) on a patron's row to flag them. Check-ins only write A..F, so
+ * this flag is preserved across updates. When a flagged patron is looked up at
+ * the desk, the front-end raises a loud animated "BANNED PATRIOT" alert.
+ *
  * The web app sends data as GET query params with a JSONP `callback`, which
  * gets through Google's redirect cleanly and lets the app read the response.
  * doPost is kept for compatibility.
@@ -79,7 +84,7 @@ function buildRoster() {
   const sheet = getSheet();
   const last = sheet.getLastRow();
   if (last < 2) return [];
-  const vals = sheet.getRange(2, 1, last - 1, 6).getValues();  // A..F
+  const vals = sheet.getRange(2, 1, last - 1, 7).getValues();  // A..G
   const byKey = {};
   for (let i = 0; i < vals.length; i++) {
     const r = vals[i];
@@ -87,13 +92,14 @@ function buildRoster() {
     const idNumber = String(r[2] || "").trim();
     if (!fullName && !idNumber) continue;
     const key = (idNumber || fullName).toLowerCase();
-    const e = byKey[key] || { fullName: "", idNumber: "", idType: "", cardIssuer: "", expiration: "", count: 0 };
+    const e = byKey[key] || { fullName: "", idNumber: "", idType: "", cardIssuer: "", expiration: "", banned: false, count: 0 };
     // Rows are in chronological order, so later rows overwrite with newer details.
     e.fullName = fullName || e.fullName;
     e.idNumber = idNumber || e.idNumber;
     if (r[3]) e.idType = String(r[3]).trim();
     if (r[4]) e.cardIssuer = String(r[4]).trim();
     if (r[5] !== "" && r[5] != null) e.expiration = fmtExpiration(r[5]);
+    if (isBannedVal(r[6])) e.banned = true;   // a ban on any row sticks to the person
     e.count++;
     byKey[key] = e;
   }
@@ -112,21 +118,34 @@ function lookupById(idNumber) {
   const sheet = getSheet();
   const last = sheet.getLastRow();
   if (last < 2) return null;
-  const vals = sheet.getRange(2, 1, last - 1, 6).getValues();  // A..F
+  const vals = sheet.getRange(2, 1, last - 1, 7).getValues();  // A..G
   let rec = null;
+  let banned = false;
   for (let i = 0; i < vals.length; i++) {
     const rowId = String(vals[i][2] || "").trim().toLowerCase();  // col C
     if (rowId && rowId === key) {
+      if (isBannedVal(vals[i][6])) banned = true;   // a ban on any row sticks
       rec = {                                  // later rows are newer; keep the last
         fullName: String(vals[i][1] || "").trim(),
         idNumber: String(vals[i][2] || "").trim(),
         idType: String(vals[i][3] || "").trim(),
         cardIssuer: String(vals[i][4] || "").trim(),
         expiration: (vals[i][5] !== "" && vals[i][5] != null) ? fmtExpiration(vals[i][5]) : "",
+        banned: false,
       };
     }
   }
+  if (rec) rec.banned = banned;
   return rec;
+}
+
+// Interprets the "Banned Patriot" column (G). Accepts a Sheets checkbox
+// (boolean TRUE) or text like "Y" / "Yes" / "TRUE" / "1" — anything else,
+// including blank, means not banned.
+function isBannedVal(v) {
+  if (v === true) return true;
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  return s === "y" || s === "yes" || s === "true" || s === "1";
 }
 
 // The sheet may hold the expiration as a real Date; normalize to the

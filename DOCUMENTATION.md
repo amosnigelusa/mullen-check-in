@@ -83,9 +83,20 @@ The Sheet columns, in the exact append order:
 | D | ID Type | One of the `config.js` `idTypes`. |
 | E | Card Issuer | School / state / country / institution. |
 | F | Expiration Date | `MM/DD/YYYY` or `NA`. |
+| G | Banned Patriot | **Staff-only**, optional. Tick the checkbox (or enter `Y`/`Yes`/`TRUE`) to flag a patron. Never written by the app. |
 
 **Upsert key:** ID Number (case-insensitive); when blank, Full Name is used. A new
 check-in for the same key **updates** that row rather than adding a duplicate.
+Check-ins only write columns A–F, so a Banned Patriot flag in column G is preserved
+across updates.
+
+**Restricted-access alert:** when the operator **presses Check In** for a patron flagged
+in column G, the form **blocks the check-in** and raises a loud animated red
+**"Restricted Library Access"** banner (no row is recorded) so the desk escalates
+instead. The flag is matched against the roster by ID Number (or Full Name when
+blank). It is not shown during scanning/auto-fill — only at the moment of check-in.
+Add the column yourself: put the header `Banned Patriot` in cell **G1**, then
+**Insert ▸ Checkbox** down column G (or just type `Y` on the relevant row).
 
 ---
 

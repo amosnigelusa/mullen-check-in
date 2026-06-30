@@ -227,6 +227,80 @@ body::before {
   box-shadow: var(--elev-1);
 }
 
+/* ============================================================
+   Banned-patron warning — a loud, animated red alert that fires
+   when a patron flagged "Banned" in the sheet is matched at the desk.
+   ============================================================ */
+.ban-warning {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 22px;
+  padding: 18px 20px;
+  border-radius: var(--r-lg);
+  color: #fff;
+  background: #b30000;
+  border: 3px solid #ff5252;
+  box-shadow: 0 0 0 0 rgba(179, 0, 0, 0.55);
+}
+.ban-warning--show {
+  animation:
+    banFlash 0.9s steps(1, end) infinite,
+    banPulse 1.4s ease-out infinite,
+    banShake 0.5s var(--ease-emphasized) 1;
+}
+.ban-warning__icon {
+  flex: none;
+  width: 52px; height: 52px;
+  border-radius: var(--r-full);
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  background: rgba(0, 0, 0, 0.22);
+  animation: banSpinPulse 1s ease-in-out infinite;
+}
+.ban-warning__body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ban-warning__title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.18rem;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+.ban-warning__text { font-size: 0.92rem; font-weight: 500; opacity: 0.95; }
+.ban-warning__name { font-size: 0.92rem; font-weight: 700; }
+.ban-warning__name:empty { display: none; }
+
+/* alternate the fill so it visibly throbs between two reds */
+@keyframes banFlash {
+  0%, 100% { background: #b30000; border-color: #ff5252; }
+  50%      { background: #8a0000; border-color: #ffd1d1; }
+}
+/* expanding halo so it grabs attention even out of the corner of the eye */
+@keyframes banPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.55); }
+  70%  { box-shadow: 0 0 0 18px rgba(255, 0, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+/* a quick shake on entrance */
+@keyframes banShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+@keyframes banSpinPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.14); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ban-warning--show {
+    animation: banFlash 1.2s steps(1, end) infinite;
+  }
+  .ban-warning__icon { animation: none; }
+}
+
 /* ---- Scan box (tonal, futuristic) ---- */
 .scanbox {
   position: relative;

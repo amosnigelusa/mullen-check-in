@@ -29,6 +29,9 @@ you can **Add to Home screen** to install it as an app.
   visitors appear — pick one and the whole row fills.
 - **Writes to your Sheet** via a Google Apps Script endpoint, in the exact
   column order. Timestamp is generated automatically.
+- **Restricted-access alert**: flag a patron in the staff-only **Banned Patriot**
+  column (G) of the Sheet; attempting to check them in is blocked with a loud red
+  *"Restricted Library Access — contact a supervisor"* banner.
 - **Offline safety net**: if there's no endpoint (or the network drops), rows
   are saved in the browser and synced automatically once connected.
 

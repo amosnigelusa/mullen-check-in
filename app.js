@@ -29,6 +29,8 @@
     modeBadge: $("modeBadge"),
     scanInput: $("scanInput"),
     scanMsg: $("scanMsg"),
+    banWarning: $("banWarning"),
+    banWarningName: $("banWarningName"),
   };
 
   // --- state ---------------------------------------------------------------
@@ -300,6 +302,7 @@
     const elapsed = performance.now() - scanStart;
     scanStart = 0;
     if (!text.trim()) return;
+    clearBanWarning();   // drop any prior patron's flag before reading a new card
 
     const parsed = window.AAMVA.parse(text);
     if (parsed) {
@@ -596,6 +599,7 @@
     els.cardIssuer.value = CFG.defaults.cardIssuer || "";
     setExpiration(CFG.defaults.expiration || "");
     updateSubList();
+    clearBanWarning();
   }
 
   function flashFill(el, val) {
@@ -603,6 +607,48 @@
     el.classList.remove("filled");
     void el.offsetWidth;          // restart the flash animation
     el.classList.add("filled");
+  }
+
+  // --- banned-patron warning ----------------------------------------------
+  // A patron flagged "Banned Patriot" in the sheet (column G, set by staff —
+  // never collected by this form) trips a loud animated red alert so the desk
+  // stops and escalates instead of checking them in.
+  function isBanned(rec) {
+    const v = String((rec && rec.banned) ?? "").trim().toLowerCase();
+    return v === "y" || v === "yes" || v === "true" || v === "1";
+  }
+
+  // Look the patron being checked in up against the known roster and return the
+  // matching record only if it's flagged banned. Keyed on ID Number (or Full
+  // Name when blank), matching the sheet's own upsert key. The roster is the
+  // source of truth when connected; offline history carries no ban flag.
+  function bannedRecordFor(row) {
+    const id = String(row.idNumber || "").toLowerCase().trim();
+    const name = String(row.fullName || "").toLowerCase().trim();
+    const rec = candidates().find((h) =>
+      id
+        ? String(h.idNumber || "").toLowerCase().trim() === id
+        : (name && String(h.fullName || "").toLowerCase().trim() === name)
+    );
+    return rec && isBanned(rec) ? rec : null;
+  }
+
+  function showBanWarning(name) {
+    const el = els.banWarning;
+    if (!el) return;
+    els.banWarningName.textContent = name ? `Patron: ${name}` : "";
+    el.hidden = false;
+    el.classList.remove("ban-warning--show");
+    void el.offsetWidth;          // restart the entrance shake/pulse
+    el.classList.add("ban-warning--show");
+  }
+
+  function clearBanWarning() {
+    const el = els.banWarning;
+    if (!el) return;
+    el.classList.remove("ban-warning--show");
+    el.hidden = true;
+    els.banWarningName.textContent = "";
   }
 
   function showSuggestions(q, field) {
@@ -693,6 +739,11 @@
       cardIssuer: els.cardIssuer.value.trim(),
       expiration: els.expiration.value.trim(),
     };
+
+    // Stop a banned patron at the point of check-in: raise the loud alert and
+    // don't record the visit, so the desk escalates instead of waving them in.
+    const banned = bannedRecordFor(row);
+    if (banned) { showBanWarning(banned.fullName || row.fullName); return; }
 
     // ignore an accidental repeat of the exact same person within a few seconds
     const sig = (row.idNumber || row.fullName || "").toLowerCase().trim();
@@ -849,6 +900,7 @@
     applyDefaults();
     els.idType.value = "";       // no remembered type — start blank every time
     updateSubList();
+    clearBanWarning();
     if (full) setScanMsg("", "");
     clearScan();
     armIdleTimer();
