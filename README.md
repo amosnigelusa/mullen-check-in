@@ -4,12 +4,21 @@ A fast, keyboard-first replacement for the visitor check-in Google Form.
 Staff-operated, runs in Chrome on the desk PC, and appends rows straight to the
 existing **Form_Responses** Google Sheet — so nothing downstream changes.
 
+## 🔗 Live demo
+
+**[amosnigelusa.github.io/mullen-check-in](https://amosnigelusa.github.io/mullen-check-in/)**
+
+Open it on any phone, tablet, or computer. It runs in **Offline mode** (rows stay
+in that browser, the real Sheet is untouched), so it's safe to explore. On Android
+you can **Add to Home screen** to install it as an app.
+
 ## What it does today (Phase 1)
 
 - **Keyboard-first**: Tab between fields, **Enter** to check in, focus jumps
   back to *Full Name* for the next person. **Esc** clears.
-- **Smart defaults**: *Card Issuer* → `Zimbabwe`, *Expiration* → `NA`,
-  *ID Type* remembers the last choice. (Edit in `config.js`.)
+- **Smart defaults**: *Expiration* → `NA`; some ID types auto-fill *Card Issuer*
+  (e.g. *Catholic U Alumni* → The Catholic University of America). The form starts
+  blank on every refresh. (Edit in `config.js`.)
 - **Expiration**: a date picker, or tick **NA** for cards without one. Stored
   as `MM/DD/YYYY` (or `NA`); scans/autofill pre-set it.
 - **Returning-visitor autofill**: start typing a name or ID number; past
