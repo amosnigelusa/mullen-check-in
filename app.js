@@ -29,8 +29,8 @@
     modeBadge: $("modeBadge"),
     scanInput: $("scanInput"),
     scanMsg: $("scanMsg"),
-    banWarning: $("banWarning"),
-    banWarningName: $("banWarningName"),
+    banDialog: $("banDialog"),
+    banDialogName: $("banDialogName"),
   };
 
   // --- state ---------------------------------------------------------------
@@ -220,6 +220,7 @@
       document.addEventListener(ev, armIdleTimer, true)
     );
     $("resetBtn").addEventListener("click", () => resetForm(true));
+    $("banDialogClose").addEventListener("click", clearBanWarning);
     els.idType.addEventListener("change", updateSubList);
     els.subSelect.addEventListener("change", () => {
       if (els.subSelect.value) {
@@ -634,21 +635,17 @@
   }
 
   function showBanWarning(name) {
-    const el = els.banWarning;
+    const el = els.banDialog;
     if (!el) return;
-    els.banWarningName.textContent = name ? `Patron: ${name}` : "";
-    el.hidden = false;
-    el.classList.remove("ban-warning--show");
-    void el.offsetWidth;          // restart the entrance shake/pulse
-    el.classList.add("ban-warning--show");
+    els.banDialogName.textContent = name ? `Patron: ${name}` : "";
+    if (!el.open) el.showModal();
   }
 
   function clearBanWarning() {
-    const el = els.banWarning;
+    const el = els.banDialog;
     if (!el) return;
-    el.classList.remove("ban-warning--show");
-    el.hidden = true;
-    els.banWarningName.textContent = "";
+    if (el.open) el.close();
+    els.banDialogName.textContent = "";
   }
 
   function showSuggestions(q, field) {

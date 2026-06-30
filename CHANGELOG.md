@@ -16,9 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (the app only writes columns A–F).
 - When the operator **presses Check In** for a flagged patron, the form **blocks the
   check-in** (no row is recorded) and raises a loud, animated red
-  **"Restricted Library Access"** banner asking staff to contact a supervisor. The
-  alert flashes, pulses a halo, and shakes on entrance (respects
-  `prefers-reduced-motion`).
+  **"Restricted Library Access"** modal popup asking staff to contact a supervisor.
+  The popup flashes, pulses a halo, and dims the form behind it until staff
+  acknowledge it (respects `prefers-reduced-motion`).
 - The flag is matched against the live roster by ID Number (or Full Name when blank).
   It is **not** shown during scanning or auto-fill — only at the moment of check-in —
   so it can't be dismissed by simply re-typing.

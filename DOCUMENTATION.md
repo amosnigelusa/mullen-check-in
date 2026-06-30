@@ -92,7 +92,7 @@ across updates.
 
 **Restricted-access alert:** when the operator **presses Check In** for a patron flagged
 in column G, the form **blocks the check-in** and raises a loud animated red
-**"Restricted Library Access"** banner (no row is recorded) so the desk escalates
+**"Restricted Library Access"** modal popup (no row is recorded) so the desk escalates
 instead. The flag is matched against the roster by ID Number (or Full Name when
 blank). It is not shown during scanning/auto-fill — only at the moment of check-in.
 Add the column yourself: put the header `Banned Patriot` in cell **G1**, then

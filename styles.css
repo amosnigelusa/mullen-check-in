@@ -228,82 +228,75 @@ body::before {
 }
 
 /* ============================================================
-   Banned-patron warning — a loud, animated red alert that fires
-   when a patron flagged "Banned" in the sheet is matched at the desk.
+   Restricted-access alert — a loud, animated red MODAL popup that
+   fires when staff try to check in a patron flagged "Banned" in the sheet.
    ============================================================ */
-.ban-warning {
-  display: flex;
-  align-items: center;
-}
-/* The base display:flex above would otherwise override the `hidden` attribute
-   (author rules beat the UA `[hidden]` rule), keeping the banner always on. */
-.ban-warning[hidden] { display: none; }
-.ban-warning {
-  gap: 16px;
-  margin: 0 0 22px;
-  padding: 18px 20px;
-  border-radius: var(--r-lg);
+.ban-dialog {
+  max-width: 440px;
   color: #fff;
   background: #b30000;
   border: 3px solid #ff5252;
-  box-shadow: 0 0 0 0 rgba(179, 0, 0, 0.55);
+  text-align: center;
+  overflow: visible;
 }
-.ban-warning--show {
+.ban-dialog[open] {
   animation:
+    dialog-in 0.3s var(--ease-emphasized),
     banFlash 0.9s steps(1, end) infinite,
-    banPulse 1.4s ease-out infinite,
-    banShake 0.5s var(--ease-emphasized) 1;
+    banPulse 1.6s ease-out infinite;
 }
-.ban-warning__icon {
-  flex: none;
-  width: 52px; height: 52px;
+.ban-dialog::backdrop { background: rgba(60, 0, 0, 0.55); backdrop-filter: blur(3px); }
+.ban-dialog__inner {
+  padding: 30px 28px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.ban-dialog__icon {
+  width: 76px; height: 76px;
   border-radius: var(--r-full);
   display: grid;
   place-items: center;
-  font-size: 34px;
+  font-size: 46px;
   background: rgba(0, 0, 0, 0.22);
   animation: banSpinPulse 1s ease-in-out infinite;
 }
-.ban-warning__body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.ban-warning__title {
+.ban-dialog__title {
+  margin: 2px 0 0;
   font-family: var(--serif);
   font-weight: 700;
-  font-size: 1.18rem;
-  letter-spacing: 0.02em;
+  font-size: 1.42rem;
+  letter-spacing: 0.01em;
   line-height: 1.15;
 }
-.ban-warning__text { font-size: 0.92rem; font-weight: 500; opacity: 0.95; }
-.ban-warning__name { font-size: 0.92rem; font-weight: 700; }
-.ban-warning__name:empty { display: none; }
+.ban-dialog__text { margin: 0; font-size: 0.98rem; font-weight: 500; opacity: 0.95; line-height: 1.45; }
+.ban-dialog__name { margin: 0; font-weight: 700; }
+.ban-dialog__name:empty { display: none; }
+.ban-dialog .btn--filled {
+  margin-top: 8px;
+  background: #fff;
+  color: #b30000;
+}
 
-/* alternate the fill so it visibly throbs between two reds */
+/* alternate the border so it visibly throbs */
 @keyframes banFlash {
   0%, 100% { background: #b30000; border-color: #ff5252; }
   50%      { background: #8a0000; border-color: #ffd1d1; }
 }
-/* expanding halo so it grabs attention even out of the corner of the eye */
+/* expanding halo so it grabs attention */
 @keyframes banPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.55); }
-  70%  { box-shadow: 0 0 0 18px rgba(255, 0, 0, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.6); }
+  70%  { box-shadow: 0 0 0 26px rgba(255, 0, 0, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-}
-/* a quick shake on entrance */
-@keyframes banShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-7px); }
-  40% { transform: translateX(7px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
 }
 @keyframes banSpinPulse {
   0%, 100% { transform: scale(1); }
   50%      { transform: scale(1.14); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ban-warning--show {
-    animation: banFlash 1.2s steps(1, end) infinite;
-  }
-  .ban-warning__icon { animation: none; }
+  .ban-dialog[open] { animation: dialog-in 0.3s var(--ease-emphasized), banFlash 1.2s steps(1, end) infinite; }
+  .ban-dialog__icon { animation: none; }
 }
 
 /* ---- Scan box (tonal, futuristic) ---- */

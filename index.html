@@ -63,15 +63,6 @@
       </section>
 
       <form id="checkinForm" class="card reveal" style="--d:1" autocomplete="off">
-        <div id="banWarning" class="ban-warning" role="alert" aria-live="assertive" hidden>
-          <span class="ban-warning__icon msym" aria-hidden="true">block</span>
-          <div class="ban-warning__body">
-            <strong class="ban-warning__title">⚠ Restricted Library Access</strong>
-            <span class="ban-warning__text">This patron's library access is currently restricted. Please do not complete check-in — kindly contact a supervisor for assistance.</span>
-            <span id="banWarningName" class="ban-warning__name"></span>
-          </div>
-        </div>
-
         <div class="field">
           <label for="fullName">Full Name <span class="req">*</span></label>
           <div class="hint">Add exactly as written on ID</div>
@@ -160,6 +151,22 @@
       <span>University Libraries · Mullen Library</span>
     </footer>
   </div>
+
+  <dialog id="banDialog" class="dialog ban-dialog" role="alertdialog"
+          aria-labelledby="banDialogTitle" aria-describedby="banDialogText">
+    <div class="ban-dialog__inner">
+      <span class="ban-dialog__icon msym" aria-hidden="true">block</span>
+      <h2 id="banDialogTitle" class="ban-dialog__title">⚠ Restricted Library Access</h2>
+      <p id="banDialogText" class="ban-dialog__text">
+        This patron's library access is currently restricted. Please do not complete
+        check-in — kindly contact a supervisor for assistance.
+      </p>
+      <p id="banDialogName" class="ban-dialog__name"></p>
+      <button type="button" id="banDialogClose" class="btn btn--filled m3-ripple">
+        <span class="msym" aria-hidden="true">check</span> Acknowledge
+      </button>
+    </div>
+  </dialog>
 
   <dialog id="settingsDialog" class="dialog">
     <form method="dialog" class="dialog__form">
