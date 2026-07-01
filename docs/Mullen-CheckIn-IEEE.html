@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>From Queue to Scan — IEEE Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,400;0,500;0,700;1,400&family=Ubuntu+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root { --ink:#000; --mut:#222; }
+  * { box-sizing: border-box; }
+  html, body { background: #f2f2f2; color: var(--ink); }
+  body { font-family: "Ubuntu", Arial, sans-serif; margin: 0; padding: 24px; }
+  .sheet {
+    background: #fff; width: 8.5in; min-height: 11in; margin: 0 auto 24px;
+    padding: 0.62in 0.6in 0.7in; box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  h1.title { font-size: 21pt; font-weight: 700; text-align: center; margin: 0 0 10px;
+    line-height: 1.2; letter-spacing: .1px; }
+  .authors { text-align: center; font-size: 11pt; margin: 6px 0 2px; }
+  .affil { text-align: center; font-size: 9.5pt; font-style: italic; color: var(--mut);
+    margin-bottom: 16px; }
+  .cols { column-count: 2; column-gap: 0.3in; text-align: justify; font-size: 9.6pt;
+    line-height: 1.42; }
+  .abstract { font-weight: 500; }
+  .abstract b, .keywords b { font-style: italic; font-weight: 700; }
+  .keywords { margin-top: 8px; font-size: 9.4pt; }
+  h2.sec { font-variant: small-caps; font-size: 10.5pt; font-weight: 700; text-align: center;
+    margin: 14px 0 6px; break-after: avoid; }
+  h3.sub { font-size: 9.8pt; font-weight: 700; font-style: italic; margin: 10px 0 3px;
+    break-after: avoid; }
+  p { margin: 0 0 6px; }
+  p.ind { text-indent: 12px; }
+  ul { margin: 0 0 6px 0; padding-left: 16px; }
+  li { margin-bottom: 3px; }
+  .refs { font-size: 8.6pt; line-height: 1.34; }
+  .refs ol { margin: 0; padding-left: 20px; }
+  .refs li { margin-bottom: 3px; }
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin: 4px 0 8px; }
+  table.tbl caption { caption-side: top; font-weight: 700; font-size: 8.6pt; text-align: center;
+    margin-bottom: 4px; text-transform: uppercase; letter-spacing:.3px;}
+  table.tbl th, table.tbl td { border: 1px solid #000; padding: 3px 5px; vertical-align: top; }
+  table.tbl thead th { background: #000; color: #fff; }
+  .fig { border: 1px solid #000; padding: 8px; font-size: 8.4pt; margin: 4px 0 8px; }
+  .fig .flow { text-align: center; font-family: "Ubuntu Mono", monospace; font-size: 8.2pt;
+    line-height: 1.5; }
+  .fig figcaption { margin-top: 6px; text-align: center; font-weight: 500; }
+  .full { column-span: all; }
+  code { font-family: "Ubuntu Mono", monospace; font-size: 8.8pt; }
+  .banner { max-width: 8.5in; margin: 0 auto 14px; font-size: 9pt; color:#333;
+    background:#fff; border:1px dashed #999; padding:8px 12px; }
+  @media print {
+    body { background:#fff; padding:0; }
+    .sheet { box-shadow:none; margin:0; width:auto; min-height:0; padding:0.55in 0.5in; }
+    .banner { display:none; }
+    @page { size: letter; margin: 0.5in; }
+  }
+</style>
+</head>
+<body>
+<div class="banner">Tip: open in Chrome and use <b>Print → Save as PDF</b> (Letter, margins Default) for a clean two-column IEEE-style PDF. This banner is hidden when printing.</div>
+<div class="sheet">
+
+  <h1 class="title">From Queue to Scan: A Zero-Cost, Keyboard-First Patron Sign-In and Automated Hourly Exit-Count System for the Academic Library Welcome Desk</h1>
+  <div class="authors">Amos N. Funguriro</div>
+  <div class="affil">University Libraries — Mullen Library, The Catholic University of America, Washington, D.C., USA</div>
+
+  <div class="cols">
+    <p class="abstract"><b>Abstract</b>—Academic library welcome desks face a recurring bottleneck: whenever many patrons arrive together—at opening, during class visits and orientation groups, when families come in to tour, and around examinations—a single operator must manually transcribe each patron's identity details into a sign-in form, taking one to three minutes per person and producing long queues that frustrate returning patrons. The legacy form also appends every submission blindly, so a mistyped or omitted second name, an altered spelling, or any slight mismatch spawns a brand-new row; a single patron therefore accumulates many fragmented, duplicate records, eroding data integrity. Compounding this, staff must record an hourly door exit count on a separate three-field form that is easily forgotten when the desk is busy. This paper presents a deployed, zero-additional-cost system that replaces manual entry with barcode and machine-readable-zone scanning, live returning-visitor auto-fill, and keyboard-first interaction; enforces one canonical record per patron through an identity-keyed idempotent write; and automates the hourly exit-count task with a countdown, active reminders, and one-field logging. The system is a static browser application backed by a Google Apps Script endpoint that writes to the library's existing Google Sheet, requiring no new servers, licences, or procurement. We describe the problem, related approaches, the architecture, and the implementation of each subsystem, and we analyse the projected impact: per-patron sign-in reduced to under five seconds for a returning patron, duplicate records eliminated in favour of one clean record per person, queues cleared substantially faster, reduced new-hire training burden, and an exit-count workflow that is prompted every hour and therefore never silently skipped. The result is a focused, working solution to a daily, visible operational problem.</p>
+
+    <p class="keywords"><b>Index Terms</b>—Library automation, self-service check-in, AAMVA barcode decoding, machine-readable zone, optical character recognition, Google Apps Script, human–computer interaction, queue reduction, workflow automation, progressive web application.</p>
+
+    <h2 class="sec">I. Introduction</h2>
+    <p class="ind">The welcome desk is the first point of contact between an academic library and its patrons. Every visitor is signed in, both to satisfy access-control and reporting requirements and to maintain an accurate record of who is in the building. In many libraries this sign-in is performed by a staff operator who types each patron's details into a web form—historically a Google Form whose responses accumulate in a spreadsheet.</p>
+    <p class="ind">This arrangement is inexpensive and familiar, but it scales poorly. Queues form not only at opening but whenever a group arrives together—orientation cohorts and class visits, families and prospective students coming in to tour, and the surges around examination periods. In all of these, patrons arrive faster than a single operator can type. Because every field is entered by hand, the desk becomes a serialisation point: the throughput of the entire entrance is limited by one person's typing speed. The problem is felt most acutely by returning patrons, who must repeat details the library already holds, and by newly hired operators, who are not yet fast at the form.</p>
+    <p class="ind">A second, quieter task shares the same operator. On every hour, staff must read a physical door counter that totals how many patrons have exited, and record it—together with the date and time—on a separate form. When the desk is under load, this hourly reading is easy to forget; a missed hour cannot be reconstructed, degrading the exit-count dataset used for occupancy and staffing analysis.</p>
+    <p class="ind">This paper describes a system, deployed at the Mullen Library welcome desk, that addresses these problems at once and at no additional cost. Its contributions are: (1) a keyboard-first, scan-driven sign-in flow that reduces per-patron entry from minutes to under five seconds; (2) live returning-visitor auto-fill sourced from the library's own spreadsheet; (3) identity-keyed, idempotent writes that enforce one clean record per patron and eliminate the duplicate-record problem of the legacy form; (4) an automated hourly exit-count subsystem that guarantees the reading is prompted and captured; and (5) an architecture that reuses existing Google Workspace assets, avoiding new infrastructure entirely.</p>
+
+    <h2 class="sec">II. Problem Statement</h2>
+    <p class="ind">We characterise the operational problem along three dimensions observed at the desk.</p>
+    <h3 class="sub">A. Manual entry is slow and serial</h3>
+    <p>Each sign-in requires five fields—full name, identification number, ID type, card issuer, and expiration—typed by hand. Measured informally, a routine sign-in takes approximately one to two minutes, extending to three for slower typists or complex names. Because one operator serves one patron at a time, the entrance throughput is bounded by this figure. Thirty arrivals in a rush therefore represent on the order of an hour of continuous typing, during which the queue is physically present and waiting.</p>
+    <h3 class="sub">B. Returning patrons repeat themselves</h3>
+    <p>A large fraction of patrons are frequent visitors whose details are unchanged from prior visits. Under manual entry, this information is re-typed every time, wasting effort and inviting inconsistency (e.g., name spellings that drift between visits), which fragments the record for the same individual.</p>
+    <h3 class="sub">C. The legacy form fragments records</h3>
+    <p>Because the incumbent Google Form appends every submission as a new row and performs no matching, small variations create separate records for the same person. A mistyped or omitted second name, a different capitalisation, an extra space, or a transposed identifier digit all yield a fresh row rather than updating the existing one. Over time a single patron accrues many duplicate, fragmented entries. This inflates visit counts, corrupts per-person history, and makes any returning-visitor lookup unreliable—a direct violation of data integrity that the manual workflow has no way to prevent.</p>
+    <h3 class="sub">D. The hourly exit count is easily missed</h3>
+    <p>The exit-count form is independent of sign-in and comprises three fields: date, time, and a six-digit counter reading. Its correctness depends on the operator remembering to act on the hour and transcribing the timestamp accurately—both fragile under load. A missed hour is unrecoverable.</p>
+
+    <h2 class="sec">III. Related Approaches</h2>
+    <p class="ind"><i>Web form capture.</i> A Google Form writing to a spreadsheet is the incumbent. It is free and requires no maintenance, but it offers no scanning, no auto-fill, and no automation of adjacent tasks; it institutionalises the manual-entry bottleneck described above.</p>
+    <p class="ind"><i>Commercial visitor-management kiosks.</i> Dedicated products provide badge printing, scanning, and dashboards, but they impose recurring licence fees, hardware, IT integration, and third-party data residency—costs and dependencies disproportionate to a single welcome desk, and often incompatible with an existing spreadsheet system of record.</p>
+    <p class="ind"><i>ILS self-check.</i> Integrated library-system self-service targets circulation (checkout/return), not identity sign-in of arbitrary visitors, and does not address the hourly exit count.</p>
+    <p class="ind">The gap is a low-cost tool that (a) accelerates identity sign-in through scanning and reuse, (b) writes to the library's existing sheet unchanged, and (c) folds the hourly exit-count chore into the same interface. The present system targets exactly this gap.</p>
+
+    <h2 class="sec">IV. Requirements</h2>
+    <p class="ind"><i>Functional.</i> Capture the five sign-in fields; decode U.S. driver's-license/state-ID barcodes and passport machine-readable zones; auto-fill returning patrons; write to the existing responses sheet; prompt for and record an hourly six-digit exit count with automatic timestamp.</p>
+    <p class="ind"><i>Non-functional.</i> Zero additional infrastructure cost; run in a standard browser on the desk PC; keyboard-first with sub-second interaction; resilient to transient network loss; protective of patron privacy; and requiring minimal operator training.</p>
+
+    <h2 class="sec">V. System Architecture</h2>
+    <p class="ind">The system follows a three-tier design in which every tier is an asset the library already possesses, as shown in Fig. 1.</p>
+
+    <figure class="fig">
+      <div class="flow">
+        [ Desk PC · Chrome ]<br/>
+        Static app: scan · validate · keyboard flow · offline queue<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;JSONP (GET) &nbsp;▲ result<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;▼ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br/>
+        [ Google Apps Script Web App ]<br/>
+        Upsert check-ins · exit counts · roster/lookup<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;│ &nbsp;Sheets API<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;▼<br/>
+        [ Google Sheets ]&nbsp; Form_Responses &nbsp;+&nbsp; Exit_Counts
+      </div>
+      <figcaption>Fig. 1. Three-tier architecture; all tiers reuse existing Google Workspace assets.</figcaption>
+    </figure>
+
+    <p class="ind"><i>Presentation tier.</i> A static HTML/CSS/JavaScript application served to the desk browser. It performs all scanning, validation, keyboard handling, timing, and an offline safety queue. It installs nothing.</p>
+    <p class="ind"><i>Endpoint tier.</i> A Google Apps Script web app exposes a small set of actions—check-in upsert, returning-visitor <code>roster</code> and <code>lookup</code>, and <code>exitCount</code>. Because Apps Script does not emit CORS headers, the browser calls it via JSONP over GET, which follows Google's redirect cleanly and returns a readable result.</p>
+    <p class="ind"><i>Data tier.</i> The library's existing responses spreadsheet remains the system of record for sign-ins, in the original column order, so nothing downstream changes. Hourly readings are appended to a dedicated <code>Exit_Counts</code> tab, keeping the two datasets cleanly separated.</p>
+
+    <h2 class="sec">VI. Implementation</h2>
+    <h3 class="sub">A. Keyboard-first entry and smart defaults</h3>
+    <p>Manual entry is optimised for speed: Tab advances through fields, Enter checks in and returns focus to the first field for the next patron, and Escape clears. Common values (card issuer, expiration handling) are pre-filled, and the timestamp is generated automatically.</p>
+    <h3 class="sub">B. AAMVA barcode decoding</h3>
+    <p>The PDF417 barcode on the back of a U.S. driver's license or state ID encodes the holder's details in the AAMVA DL/ID standard. A keyboard-wedge scanner "types" the payload; the application captures it, parses the AAMVA fields, and populates name, number, type, issuer, and expiry in one action.</p>
+    <h3 class="sub">C. Passport machine-readable-zone OCR</h3>
+    <p>For passports, the device camera captures the two-line machine-readable zone (ICAO 9303). The image region is thresholded (Otsu's method) and read by an in-browser OCR engine; the parser validates the embedded check digits and fills the same fields, flagging low-confidence reads for operator confirmation.</p>
+    <h3 class="sub">D. Returning-visitor auto-fill</h3>
+    <p>On scanning or typing an identifier, the application queries the sheet live and, if the patron exists, fills the remaining fields; a name type-ahead offers the same completion. This directly resolves the fragmentation of Section&nbsp;II-C: server-side writes are an idempotent upsert keyed on the identification number, so a returning patron updates their single canonical record instead of spawning a duplicate, and auto-fill removes the manual re-typing that introduced spelling and formatting variation in the first place. A flagged, restricted-access patron triggers a prominent alert before check-in.</p>
+    <h3 class="sub">E. Automated hourly exit-count subsystem</h3>
+    <p>A one-second timer counts down to the top of each hour. Ten minutes before the hour (at :50) the subsystem activates: it reveals a single six-digit input, raises a desktop notification, and sounds a short chime. The operator enters only the counter reading; date and time are stamped automatically, and the record is written to <code>Exit_Counts</code>. If the reading is not logged, the prompt persists—so a busy hour is never silently skipped—and once logged, the countdown re-targets the next hour's activation.</p>
+    <h3 class="sub">F. Reliability</h3>
+    <p>Writes are optimistic: the operator is confirmed instantly while the record is sent in the background. If the network is unavailable, sign-ins and exit counts are stored in a local queue and synced automatically on reconnection, so the desk never stops. The upsert makes retries safe.</p>
+    <h3 class="sub">G. Privacy and safety</h3>
+    <p>To protect patron data on an unattended screen, the form auto-clears after a brief period of inactivity. Restricted-access handling and check-digit validation further protect safety and data integrity.</p>
+
+    <h2 class="sec">VII. Evaluation</h2>
+    <p class="ind">We assess the system against the problem dimensions of Section II. Table I summarises the operational change.</p>
+
+    <table class="tbl full">
+      <caption>Table I. Operational impact (typical peak conditions)</caption>
+      <thead><tr><th>Dimension</th><th>Before (manual)</th><th>After (this system)</th></tr></thead>
+      <tbody>
+        <tr><td>Time per returning patron</td><td>1–3 min typing</td><td>Under 5 s, single scan</td></tr>
+        <tr><td>Records per patron</td><td>Duplicates accumulate</td><td>One canonical record (upsert)</td></tr>
+        <tr><td>Queue at any influx</td><td>Grows; visible waiting</td><td>Cleared substantially faster</td></tr>
+        <tr><td>New-hire ramp-up</td><td>Slow; typing-bound</td><td>Scan-first; minimal training</td></tr>
+        <tr><td>Hourly exit count</td><td>Manual; sometimes missed</td><td>Prompted hourly; not skipped</td></tr>
+        <tr><td>Timestamp accuracy</td><td>Hand-typed</td><td>Automatic</td></tr>
+        <tr><td>Added cost/infrastructure</td><td>—</td><td>None</td></tr>
+      </tbody>
+    </table>
+
+    <p class="ind">The dominant gain is the collapse of per-patron time for the common case of a returning patron: a single scan populates and confirms the record in under five seconds, replacing the one-to-three-minute transcription of five fields and moving the desk from a typing-bound serial process to a scan-bound one, so queues at any influx clear correspondingly faster. A second, durable gain is data integrity: because writes are keyed on the patron identifier and performed as an upsert, a returning patron no longer creates a new row, so the duplicate, fragmented records produced by the legacy form are eliminated and each person converges to a single clean record. The exit-count subsystem changes the reliability of that task from memory-dependent to prompted-by-design, and reducing it to one field removes two opportunities for transcription error. Because the operator's fastest path is now scanning, the training burden for new hires falls. These figures are drawn from informal desk observation rather than a controlled trial; a formal timing study is future work.</p>
+
+    <h2 class="sec">VIII. Discussion and Limitations</h2>
+    <p class="ind">MRZ reading is OCR-based and therefore imperfect under poor lighting; check-digit validation and operator confirmation mitigate, but do not eliminate, misreads. The offline convenience history is per-browser, so identical behaviour across machines relies on the shared sheet roster. JSONP is used because Apps Script lacks CORS; while adequate here, it constrains request semantics. Finally, Apps Script and Sheets impose service quotas that bound very high volumes, though these comfortably exceed a single desk's load.</p>
+
+    <h2 class="sec">IX. Future Work</h2>
+    <p class="ind">The system is in active development, and additional features are already in progress. Anticipated directions include a shared, sheet-synced returning-visitor index across desks, decoding of additional credential types, an analytics view over sign-in and exit-count data for occupancy and staffing, and a formal, instrumented timing study to quantify the gains reported here.</p>
+
+    <h2 class="sec">X. Conclusion</h2>
+    <p class="ind">A daily, visible bottleneck at the library welcome desk—slow manual sign-in and an easily forgotten hourly exit count—was addressed with a focused, deployed system that scans instead of types, reuses records for returning patrons, and automates the hourly reading, all on top of the library's existing Google Workspace assets and at no additional cost. By converting the desk from a typing-bound serial process into a scan-driven one and making the hourly count prompted-by-design, the system shortens queues, reduces training burden, and improves data completeness and accuracy. It demonstrates that a well-scoped, low-cost tool can materially improve an everyday operational workflow.</p>
+
+    <div class="refs">
+      <h2 class="sec">References</h2>
+      <ol>
+        <li>American Association of Motor Vehicle Administrators, <i>DL/ID Card Design Standard</i>, AAMVA, 2020.</li>
+        <li>International Civil Aviation Organization, <i>Doc 9303: Machine Readable Travel Documents</i>, 8th ed., ICAO, 2021.</li>
+        <li>N. Otsu, "A threshold selection method from gray-level histograms," <i>IEEE Trans. Syst., Man, Cybern.</i>, vol. 9, no. 1, pp. 62–66, 1979.</li>
+        <li>R. Smith, "An overview of the Tesseract OCR engine," in <i>Proc. ICDAR</i>, 2007, pp. 629–633.</li>
+        <li>Google, "Apps Script Web Apps and <code>ContentService</code>," Google Developers Documentation, 2024.</li>
+        <li>B. Shneiderman et al., <i>Designing the User Interface</i>, 6th ed. Pearson, 2016.</li>
+        <li>D. G. Kendall, "Stochastic processes occurring in the theory of queues," <i>Ann. Math. Statist.</i>, vol. 24, no. 3, pp. 338–354, 1953.</li>
+        <li>A. Cooper, R. Reimann, and D. Cronin, <i>About Face: The Essentials of Interaction Design</i>, 4th ed. Wiley, 2014.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+</body>
+</html>
