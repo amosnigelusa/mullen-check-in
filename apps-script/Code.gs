@@ -74,11 +74,6 @@ function doGet(e) {
   if (p.action === "exitCount") {
     return respond(saveExitCount(p), p.callback);
   }
-  // Library open hours for today, scraped from the CUA libraries site. Done
-  // server-side because the browser can't fetch that page cross-origin.
-  if (p.action === "hours") {
-    return respond(fetchHours(), p.callback);
-  }
   // A check-in carries data; a bare visit is just a health check.
   if (p.fullName || p.idNumber) {
     return respond(saveRow(p), p.callback);
@@ -228,58 +223,6 @@ function saveExitCount(data) {
   } catch (err) {
     return { ok: false, error: String(err) };
   }
-}
-
-// Scrapes the library's "hours this week" feed (the same source the public
-// site's page uses) and returns today's open hours plus the 7-day outlook.
-// The feed already reflects holidays/special hours. Cached briefly to avoid
-// hammering the site on every desk load.
-const HOURS_URL = "https://libraries.catholic.edu/_media/scripts/php/hours-page.php";
-
-function fetchHours() {
-  try {
-    const cache = CacheService.getScriptCache();
-    let html = cache.get("hoursHtml");
-    if (!html) {
-      const resp = UrlFetchApp.fetch(HOURS_URL, { muteHttpExceptions: true, followRedirects: true });
-      if (resp.getResponseCode() !== 200) {
-        return { ok: false, error: "hours feed HTTP " + resp.getResponseCode() };
-      }
-      html = resp.getContentText();
-      cache.put("hoursHtml", html, 3 * 60 * 60);   // 3 hours
-    }
-
-    // Rows look like: <tr><td>Wednesday, July 1st</td><td>9am - 8pm</td></tr>
-    const rows = [];
-    const re = /<tr[^>]*>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>\s*<\/tr>/gi;
-    let m;
-    while ((m = re.exec(html))) {
-      const label = cleanText(m[1]);
-      const hours = cleanText(m[2]);
-      if (!label) continue;
-      rows.push({ label: label, weekday: label.split(",")[0].trim(), hours: hours });
-    }
-    if (!rows.length) return { ok: false, error: "could not parse hours feed" };
-
-    // The feed always lists today as the first row, so take it directly — this
-    // matches exactly what the library site shows and avoids any timezone drift.
-    const today = rows[0];
-    return { ok: true, today: today, week: rows };
-  } catch (err) {
-    return { ok: false, error: String(err) };
-  }
-}
-
-// Strip tags, collapse whitespace, and decode the few HTML entities the feed
-// uses (non-breaking space, en dash, ampersand).
-function cleanText(s) {
-  return String(s || "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&#160;|&nbsp;/g, " ")
-    .replace(/&#8211;|&ndash;/g, "-")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function getExitSheet() {

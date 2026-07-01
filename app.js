@@ -41,7 +41,6 @@
     exitSubmit: $("exitSubmit"),
     exitMsg: $("exitMsg"),
     todayDate: $("todayDate"),
-    todayHours: $("todayHours"),
   };
 
   // --- state ---------------------------------------------------------------
@@ -89,54 +88,20 @@
     els.scanInput.focus();
   }
 
-  // --- today's date + library hours ----------------------------------------
-  // Shows the current date (client clock) and the library's open hours for
-  // today, scraped live from the CUA libraries site via the Apps Script proxy
-  // (the browser can't fetch that page cross-origin). Re-checks when the day
-  // rolls over so an all-day desk session stays correct.
+  // --- today's date --------------------------------------------------------
+  // Shows the current date from the client clock; refreshed when the day rolls
+  // over so an all-day desk session stays correct.
   function renderToday() {
     const now = new Date();
     todayKey = dayKey(now);
     els.todayDate.textContent = now.toLocaleDateString([], {
       weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
-    loadHours();
   }
 
   function dayKey(d) {
     const p = (n) => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-  }
-
-  async function loadHours(attempt = 0) {
-    if (!endpoint) { setHours("Connect the sheet to show hours", ""); return; }
-    const res = await jsonp(endpoint, { action: "hours" }, 15000);
-    console.warn("loadHours response:", res);
-    if (res && res.ok && res.today) {
-      const h = String(res.today.hours || "").trim();
-      const closed = /^closed$/i.test(h);
-      setHours(closed ? "Closed today" : `Open ${h}`, closed ? "is-closed" : "is-open");
-      return;
-    }
-    // A cold Apps Script start plus the live library fetch can overrun the
-    // timeout on the first hit; the server still caches the result, so a quick
-    // retry lands on the warm cache and returns instantly.
-    if (!res && attempt < 2) {
-      setHours("Checking hours…", "");
-      setTimeout(() => loadHours(attempt + 1), 1500);
-      return;
-    }
-    // Surface the actual reason so it's diagnosable at the desk.
-    let why = "Hours unavailable";
-    if (!res) why = "Hours unavailable (no response — check endpoint URL)";
-    else if (res.ok && !res.today) why = "Hours unavailable (redeploy Apps Script — New version)";
-    else if (res.error) why = "Hours unavailable: " + res.error;
-    setHours(why, "");
-  }
-
-  function setHours(text, cls) {
-    els.todayHours.textContent = text;
-    els.todayHours.className = "today__value" + (cls ? " " + cls : "");
   }
 
   // --- hourly exit-count reading -------------------------------------------
@@ -389,7 +354,7 @@
     if (!endpoint) { setBadge("Offline mode", "mock"); return; }
     setBadge("Checking…", "mock");
     const res = await jsonp(endpoint, {});   // health check (no row data)
-    if (res && res.ok) { setBadge("Connected", "live"); flushQueue(); flushExitQueue(); loadRoster(); loadHours(); }
+    if (res && res.ok) { setBadge("Connected", "live"); flushQueue(); flushExitQueue(); loadRoster(); }
     else setBadge("Not reachable", "mock");
   }
 
