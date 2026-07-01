@@ -42,7 +42,7 @@
   let lastSubmitSig = "", lastSubmitAt = 0;  // guards against double-submits
   let endpoint = localStorage.getItem(LS_ENDPOINT) || "";
   let idleTimer = null;                  // clears the form after inactivity (privacy)
-  const IDLE_MS = 60000;                 // 1 minute of no operator activity
+  const IDLE_MS = 15000;                 // 15 seconds of no operator activity
 
   // --- init ----------------------------------------------------------------
   function init() {
