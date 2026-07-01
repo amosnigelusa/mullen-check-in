@@ -110,14 +110,20 @@
 
   async function loadHours() {
     if (!endpoint) { setHours("Connect the sheet to show hours", ""); return; }
-    const res = await jsonp(endpoint, { action: "hours" }, 6000);
+    const res = await jsonp(endpoint, { action: "hours" }, 8000);
+    console.warn("loadHours response:", res);
     if (res && res.ok && res.today) {
       const h = String(res.today.hours || "").trim();
       const closed = /^closed$/i.test(h);
       setHours(closed ? "Closed today" : `Open ${h}`, closed ? "is-closed" : "is-open");
-    } else {
-      setHours("Hours unavailable", "");
+      return;
     }
+    // Surface the actual reason so it's diagnosable at the desk.
+    let why = "Hours unavailable";
+    if (!res) why = "Hours unavailable (no response — check endpoint URL)";
+    else if (res.ok && !res.today) why = "Hours unavailable (redeploy Apps Script — New version)";
+    else if (res.error) why = "Hours unavailable: " + res.error;
+    setHours(why, "");
   }
 
   function setHours(text, cls) {
