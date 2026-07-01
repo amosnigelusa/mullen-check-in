@@ -8,6 +8,8 @@
   const LS_ENDPOINT = "checkin.endpoint";
   const LS_HISTORY = "checkin.history";       // returning-visitor memory
   const LS_QUEUE = "checkin.queue";           // rows captured while offline
+  const LS_EXIT_QUEUE = "checkin.exitQueue";  // exit-count readings captured while offline
+  const LS_EXIT_DONE = "checkin.exitDone.v2";  // last hour-window whose reading was logged (v2: drops pre-release test markers)
 
   const $ = (id) => document.getElementById(id);
   const form = $("checkinForm");
@@ -31,6 +33,15 @@
     scanMsg: $("scanMsg"),
     banDialog: $("banDialog"),
     banDialogName: $("banDialogName"),
+    exitPanel: $("exitPanel"),
+    exitForm: $("exitForm"),
+    exitLabel: $("exitLabel"),
+    exitCountdown: $("exitCountdown"),
+    exitCount: $("exitCount"),
+    exitSubmit: $("exitSubmit"),
+    exitMsg: $("exitMsg"),
+    todayDate: $("todayDate"),
+    todayHours: $("todayHours"),
   };
 
   // --- state ---------------------------------------------------------------
@@ -43,6 +54,13 @@
   let endpoint = localStorage.getItem(LS_ENDPOINT) || "";
   let idleTimer = null;                  // clears the form after inactivity (privacy)
   const IDLE_MS = 15000;                 // 15 seconds of no operator activity
+
+  // --- hourly exit-count reading -------------------------------------------
+  const EXIT_WINDOW_MS = 10 * 60 * 1000; // prompt within the last 10 min of each hour
+  let exitPending = false;               // a reading is currently being asked for
+  let exitPendingWindow = 0;             // the hour boundary (epoch ms) it's for
+  let audioCtx = null;                   // lazily created for the reminder chime
+  let todayKey = "";                     // YYYY-MM-DD of the day currently shown
 
   // --- init ----------------------------------------------------------------
   function init() {
@@ -59,9 +77,188 @@
     wireEvents();
     attachRipples();
     // keep the background queue draining so optimistic submits reconcile fast
-    setInterval(() => { if (endpoint && queueSize()) flushQueue(); }, 10000);
+    setInterval(() => { if (endpoint) { if (queueSize()) flushQueue(); if (exitQueueSize()) flushExitQueue(); } }, 10000);
+    // ask for notification permission up front so the hourly reminder can pop
+    if ("Notification" in window && Notification.permission === "default") {
+      try { Notification.requestPermission(); } catch {}
+    }
+    tickExit();
+    setInterval(tickExit, 1000);         // drive the hourly countdown + window
+    renderToday();                       // today's date + library hours
     armIdleTimer();
     els.scanInput.focus();
+  }
+
+  // --- today's date + library hours ----------------------------------------
+  // Shows the current date (client clock) and the library's open hours for
+  // today, scraped live from the CUA libraries site via the Apps Script proxy
+  // (the browser can't fetch that page cross-origin). Re-checks when the day
+  // rolls over so an all-day desk session stays correct.
+  function renderToday() {
+    const now = new Date();
+    todayKey = dayKey(now);
+    els.todayDate.textContent = now.toLocaleDateString([], {
+      weekday: "long", year: "numeric", month: "long", day: "numeric",
+    });
+    loadHours();
+  }
+
+  function dayKey(d) {
+    const p = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+
+  async function loadHours() {
+    if (!endpoint) { setHours("Connect the sheet to show hours", ""); return; }
+    const res = await jsonp(endpoint, { action: "hours" }, 6000);
+    if (res && res.ok && res.today) {
+      const h = String(res.today.hours || "").trim();
+      const closed = /^closed$/i.test(h);
+      setHours(closed ? "Closed today" : `Open ${h}`, closed ? "is-closed" : "is-open");
+    } else {
+      setHours("Hours unavailable", "");
+    }
+  }
+
+  function setHours(text, cls) {
+    els.todayHours.textContent = text;
+    els.todayHours.className = "today__value" + (cls ? " " + cls : "");
+  }
+
+  // --- hourly exit-count reading -------------------------------------------
+  // A door counter shows the running total of patrons who've left; staff record
+  // it once an hour. We count down to the top of each hour and, in the final
+  // 10 minutes, pop a reminder + a 6-digit entry field. A due reading stays up
+  // (kept prompting) until it's logged, so an hour is never silently skipped.
+  const HOUR_MS = 60 * 60 * 1000;
+
+  function tickExit() {
+    const now = Date.now();
+    const d = new Date(now);
+
+    // Crossed midnight while the desk stayed open — refresh date + hours.
+    if (dayKey(d) !== todayKey) renderToday();
+
+    // The hour boundary (top of hour) we're currently working toward. If this
+    // hour's reading is already logged, aim at the next hour instead — so the
+    // countdown always points at the NEXT activation, not an hour that's done.
+    const nextHour = new Date(d);
+    nextHour.setMinutes(0, 0, 0);
+    nextHour.setHours(d.getHours() + 1);
+    let boundary = nextHour.getTime();
+    if (lastExitDone() === boundary) boundary += HOUR_MS;
+
+    // Activation fires at :50 (EXIT_WINDOW_MS before the hour) and stays up
+    // until the reading is logged, then the cycle repeats next hour.
+    const windowStart = boundary - EXIT_WINDOW_MS;
+    const msToActivation = windowStart - now;
+
+    if (!exitPending && now >= windowStart && lastExitDone() !== boundary) {
+      openExitReading(boundary);
+    }
+
+    // Countdown display: time until the next reading is due, then a loud
+    // "reading due" state while one is pending.
+    if (exitPending) {
+      els.exitPanel.classList.add("is-due");
+      els.exitLabel.textContent = "Exit count reading due — log the door counter";
+      els.exitCountdown.textContent = "Reading due now";
+    } else {
+      els.exitPanel.classList.remove("is-due");
+      els.exitLabel.textContent = "Next exit count in";
+      els.exitCountdown.textContent = fmtCountdown(Math.max(0, msToActivation));
+    }
+  }
+
+  function fmtCountdown(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    const p = (n) => String(n).padStart(2, "0");
+    return `${p(Math.floor(s / 60))}:${p(s % 60)}`;
+  }
+
+  function openExitReading(boundary) {
+    exitPending = true;
+    exitPendingWindow = boundary;
+    els.exitForm.hidden = false;
+    setExitMsg("", "");
+    const at = new Date(boundary).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    notify("Take your exit count reading", `Enter the door counter's exit total for the ${at} hour.`);
+    toast("Take your exit count reading", "info", { title: "Exit count due", duration: 8000 });
+    chime();
+  }
+
+  function closeExitReading() {
+    exitPending = false;
+    els.exitForm.hidden = true;
+    els.exitCount.value = "";
+    setExitMsg("", "");
+    els.exitPanel.classList.remove("is-due");
+  }
+
+  async function onExitSubmit(e) {
+    e.preventDefault();
+    const count = els.exitCount.value.replace(/\D/g, "");
+    if (!/^\d{6}$/.test(count)) {
+      setExitMsg("Enter the 6-digit number shown on the door counter.", "err");
+      els.exitCount.focus();
+      return;
+    }
+    const entry = { timestamp: formatTimestamp(new Date()), exitCount: count };
+    els.exitSubmit.disabled = true;
+    setExitMsg("Saving…", "info");
+    const res = await sendExitCount(entry);
+    els.exitSubmit.disabled = false;
+
+    if (res === false) {                 // server ran but rejected it — keep asking
+      setExitMsg("The server rejected that reading — check it and try again.", "err");
+      return;
+    }
+    // "live" or "queued": it's safely recorded (or will sync), so stop prompting.
+    markExitDone(exitPendingWindow);
+    closeExitReading();
+    toast(`Exit count ${count} logged`, "ok", { title: "Exit count saved" });
+    els.scanInput.focus();
+  }
+
+  function setExitMsg(text, cls) {
+    els.exitMsg.textContent = text;
+    els.exitMsg.className = "scanmsg" + (cls ? " " + cls : "");
+  }
+
+  // A window is identified by its hour boundary (epoch ms); persist the last
+  // logged one so a page refresh mid-window doesn't nag for a done reading.
+  function lastExitDone() { return Number(localStorage.getItem(LS_EXIT_DONE) || 0); }
+  function markExitDone(boundary) { localStorage.setItem(LS_EXIT_DONE, String(boundary)); }
+
+  // System notification when available; the toast + chime are the fallback.
+  function notify(title, body) {
+    try {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(title, { body, tag: "exit-count", renotify: true });
+      }
+    } catch {}
+  }
+
+  // A short two-note chime so the desk hears the reminder without watching.
+  function chime() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      const now = audioCtx.currentTime;
+      [880, 1180].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        const t = now + i * 0.18;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.18, t + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.18);
+      });
+    } catch {}
   }
 
   // Material-style touch ripple: spawn an expanding circle from the press
@@ -178,7 +375,7 @@
     if (!endpoint) { setBadge("Offline mode", "mock"); return; }
     setBadge("Checking…", "mock");
     const res = await jsonp(endpoint, {});   // health check (no row data)
-    if (res && res.ok) { setBadge("Connected", "live"); flushQueue(); loadRoster(); }
+    if (res && res.ok) { setBadge("Connected", "live"); flushQueue(); flushExitQueue(); loadRoster(); loadHours(); }
     else setBadge("Not reachable", "mock");
   }
 
@@ -221,6 +418,10 @@
     );
     $("resetBtn").addEventListener("click", () => resetForm(true));
     $("banDialogClose").addEventListener("click", clearBanWarning);
+    els.exitForm.addEventListener("submit", onExitSubmit);
+    els.exitCount.addEventListener("input", () => {
+      els.exitCount.value = els.exitCount.value.replace(/\D/g, "").slice(0, 6);
+    });
     els.idType.addEventListener("change", updateSubList);
     els.subSelect.addEventListener("change", () => {
       if (els.subSelect.value) {
@@ -830,6 +1031,35 @@
     }
     save(LS_QUEUE, remaining);
     if (!remaining.length) toast("Offline rows synced to the sheet", "ok", { title: "Back online" });
+  }
+
+  // --- exit-count send + offline queue -------------------------------------
+  // returns "live" | "queued" | false, mirroring sendRow so a slow/absent
+  // network keeps the reading safe instead of losing it.
+  async function sendExitCount(entry) {
+    if (!endpoint) { enqueueExit(entry); return "queued"; }
+    const res = await jsonp(endpoint, { action: "exitCount", ...entry });
+    if (res && res.ok) return "live";
+    if (res && res.ok === false) { console.warn("Exit-count error:", res.error); return false; }
+    enqueueExit(entry);
+    return "queued";
+  }
+  function enqueueExit(entry) {
+    const q = load(LS_EXIT_QUEUE, []);
+    q.push(entry);
+    save(LS_EXIT_QUEUE, q);
+  }
+  function exitQueueSize() { return load(LS_EXIT_QUEUE, []).length; }
+  async function flushExitQueue() {
+    if (!endpoint) return;
+    const q = load(LS_EXIT_QUEUE, []);
+    if (!q.length) return;
+    const remaining = [];
+    for (const entry of q) {
+      const res = await jsonp(endpoint, { action: "exitCount", ...entry });
+      if (!(res && res.ok)) remaining.push(entry);
+    }
+    save(LS_EXIT_QUEUE, remaining);
   }
 
   // --- return-entry detection ---------------------------------------------

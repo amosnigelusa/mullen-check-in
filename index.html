@@ -42,7 +42,53 @@
     </header>
 
     <main class="app">
-      <section class="scanbox reveal" style="--d:0">
+      <section id="todayBar" class="today reveal" style="--d:0">
+        <div class="today__item">
+          <span class="today__icon msym" aria-hidden="true">calendar_today</span>
+          <div class="today__copy">
+            <span class="today__label">Today</span>
+            <span id="todayDate" class="today__value">—</span>
+          </div>
+        </div>
+        <span class="today__sep" aria-hidden="true"></span>
+        <div class="today__item">
+          <span class="today__icon msym" aria-hidden="true">schedule</span>
+          <div class="today__copy">
+            <span class="today__label">Library hours</span>
+            <span id="todayHours" class="today__value">Checking…</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="exitPanel" class="exit reveal" style="--d:1" aria-live="polite">
+        <div class="exit__timer">
+          <span class="exit__icon msym" aria-hidden="true">timer</span>
+          <div class="exit__copy">
+            <span id="exitLabel" class="exit__label">Next exit count in</span>
+            <span id="exitCountdown" class="exit__clock">--:--</span>
+          </div>
+        </div>
+        <form id="exitForm" class="exit__form" hidden autocomplete="off">
+          <div class="exit__prompt">
+            <span class="msym" aria-hidden="true">directions_walk</span>
+            Take your exit count reading
+          </div>
+          <div class="exit__entry">
+            <div class="control">
+              <span class="control__icon msym" aria-hidden="true">tag</span>
+              <input id="exitCount" name="exitCount" type="text" inputmode="numeric"
+                     pattern="\d{6}" maxlength="6" required
+                     placeholder="6-digit door counter reading" />
+            </div>
+            <button type="submit" class="btn btn--filled m3-ripple" id="exitSubmit">
+              <span class="msym" aria-hidden="true">save</span> Log count
+            </button>
+          </div>
+          <p id="exitMsg" class="scanmsg" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="scanbox reveal" style="--d:2">
         <div class="scanbox__head">
           <span class="scanbox__icon msym" aria-hidden="true">barcode_scanner</span>
           <div class="scanbox__copy">
@@ -62,7 +108,7 @@
         </button>
       </section>
 
-      <form id="checkinForm" class="card reveal" style="--d:1" autocomplete="off">
+      <form id="checkinForm" class="card reveal" style="--d:3" autocomplete="off">
         <div class="field">
           <label for="fullName">Full Name <span class="req">*</span></label>
           <div class="hint">Add exactly as written on ID</div>
@@ -136,7 +182,7 @@
         </div>
       </form>
 
-      <section class="recent reveal" style="--d:2">
+      <section class="recent reveal" style="--d:4">
         <div class="recent__head">
           <span class="recent__icon msym" aria-hidden="true">history</span>
           <h2>Last check-in <span id="recentCount" class="muted"></span></h2>
