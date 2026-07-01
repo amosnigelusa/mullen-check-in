@@ -350,36 +350,41 @@ body::before {
 .scanmsg.info { color: var(--blue); }
 
 /* ============================================================
-   Today's date strip
+   Today's date — a slim, centered pill
    ============================================================ */
 .today {
-  display: flex;
+  align-self: center;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface-container-lowest);
+  padding: 6px 15px 6px 12px;
+  border-radius: var(--r-full);
+  background: linear-gradient(120deg, var(--surface-container-lowest), var(--surface-container-low));
   border: 1px solid var(--outline-variant);
-  border-radius: var(--r-lg);
-  padding: 10px 16px;
   box-shadow: var(--elev-1);
+  position: relative;
+  overflow: hidden;
 }
-.today__item { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 0; }
-.today__icon {
-  flex: none;
-  width: 34px; height: 34px;
-  border-radius: var(--r-sm);
-  display: grid; place-items: center;
-  font-size: 20px;
-  color: var(--secondary);
-  background: var(--secondary-container);
-}
-.today__copy { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-.today__label {
-  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--on-surface-variant);
-}
+.today__icon { font-size: 18px; color: var(--secondary); }
 .today__value {
-  font-weight: 600; font-size: 0.98rem; color: var(--on-surface);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 600; font-size: 0.9rem; letter-spacing: 0.01em;
+  color: var(--on-surface); white-space: nowrap;
+}
+/* an occasional light sheen sweeps across for a subtle, living feel */
+.today::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.5) 50%, transparent 68%);
+  transform: translateX(-120%);
+  animation: today-sheen 7s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes today-sheen {
+  0%, 84% { transform: translateX(-120%); }
+  100%    { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .today::after { display: none; }
 }
 
 /* ============================================================
