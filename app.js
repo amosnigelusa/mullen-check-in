@@ -108,14 +108,22 @@
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
 
-  async function loadHours() {
+  async function loadHours(attempt = 0) {
     if (!endpoint) { setHours("Connect the sheet to show hours", ""); return; }
-    const res = await jsonp(endpoint, { action: "hours" }, 8000);
+    const res = await jsonp(endpoint, { action: "hours" }, 15000);
     console.warn("loadHours response:", res);
     if (res && res.ok && res.today) {
       const h = String(res.today.hours || "").trim();
       const closed = /^closed$/i.test(h);
       setHours(closed ? "Closed today" : `Open ${h}`, closed ? "is-closed" : "is-open");
+      return;
+    }
+    // A cold Apps Script start plus the live library fetch can overrun the
+    // timeout on the first hit; the server still caches the result, so a quick
+    // retry lands on the warm cache and returns instantly.
+    if (!res && attempt < 2) {
+      setHours("Checking hours…", "");
+      setTimeout(() => loadHours(attempt + 1), 1500);
       return;
     }
     // Surface the actual reason so it's diagnosable at the desk.
